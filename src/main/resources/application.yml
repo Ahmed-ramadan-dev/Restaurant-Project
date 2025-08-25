@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: Restaurant-Project
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/restaurant_db?allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password: 12345678
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  Messages:
+    basename: i18n/Messages
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      username: default
+      password: "mypassword"
+server:
+  port: 8081
+
+token:
+  secret: U2VjdXJlU3Ryb25nU2VjcmV0S2V5Rm9ySlcgdGhhdCBpcyAzMgpieXRlcw==
+  time: 1800000
