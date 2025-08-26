@@ -23,23 +23,27 @@ public class TokenHandler {
     @Autowired
     private UserService userService;
     private Duration time;
-    private JwtBuilder jwtBilder;
+   // private JwtBuilder jwtBilder;
     private JwtParser jwtParser;
     private String secretKey;
+    private Key key;
 
 
 
 public TokenHandler(JwtToken jwtToken) {
     this.time = jwtToken.getTime();
     this.secretKey = jwtToken.getSecret();
-    Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
-    jwtBilder = Jwts.builder().signWith(key);
+    this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+   // Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+    //jwtBilder = Jwts.builder().signWith(key);
     jwtParser = Jwts.parserBuilder().setSigningKey(key).build();
 
 }
 public String CreateToken(UserVm uservm) {
     Date issueDate = new Date();
     Date expirationDate = Date.from(issueDate.toInstant().plus(time));
+    JwtBuilder jwtBilder = Jwts.builder().signWith(key);// create jwt token new every time
+
     jwtBilder.setSubject(uservm.getUsername());
     jwtBilder.setIssuedAt(issueDate);
     jwtBilder.setExpiration(expirationDate);
