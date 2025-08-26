@@ -40,4 +40,5 @@ public class RequestOrderVm {
             example = "3"
     )
     private Integer totalNumber;
+
 }

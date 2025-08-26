@@ -6,13 +6,16 @@ import com.spring.boot.Controller.Vm.ProductOrderItemVm;
 import com.spring.boot.Controller.Vm.RequestOrderVm;
 import com.spring.boot.Controller.Vm.security.UserVm;
 import com.spring.boot.Exception.SystemException;
+import com.spring.boot.Mapper.UserMapper;
 import com.spring.boot.Model.Order;
 import com.spring.boot.Model.Product;
 import com.spring.boot.Model.Security.User;
 import com.spring.boot.Repo.OrderRepo;
 import com.spring.boot.Repo.ProductRepo;
 import com.spring.boot.Repo.Security.UserRepo;
+import com.spring.boot.Service.CurrentUserService;
 import com.spring.boot.Service.OrderService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -34,16 +37,18 @@ public class OrderServiceImpl implements OrderService {
     private OrderRepo orderRepo;
   @Autowired
   private ProductRepo productRepo;
-
+  @Autowired
+  private CurrentUserService currentUserService;
 
     @Override
+    @Transactional
     public void createOrder(RequestOrderVm requestOrderVm) {// product ids / total prise/ total number
-        if (Objects.isNull(requestOrderVm) ||
+      /*  if (Objects.isNull(requestOrderVm) ||
                 Objects.isNull(requestOrderVm.getProductOrderItemVmList()) ||
                 requestOrderVm.getProductOrderItemVmList().isEmpty()) {
 
             throw new SystemException("order.request.invalid", HttpStatus.BAD_REQUEST);
-        }
+        }*/
 
         List<Long> Ids = requestOrderVm.getProductOrderItemVmList().stream().map(vm -> vm.getProductId()).distinct().collect(Collectors.toList());
 
@@ -74,23 +79,25 @@ public class OrderServiceImpl implements OrderService {
         if (totalNumberDb!= requestOrderVm.getTotalNumber()){
             throw new SystemException("total.number.is.wrong", HttpStatus.BAD_REQUEST);
         }
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+       /* Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             UserVm userVm = (UserVm)authentication.getPrincipal(); // دي هتجيب اليوزرنيم بس
         String username = userVm.getUsername();
         Optional<User> user = userRepo.findByUsername(username);
         if (!user.isPresent()) {
             throw new SystemException("user.not.found", HttpStatus.BAD_REQUEST);
         }
-        long userId = user.get().getId();
+        long userId = user.get().getId();*/
+        UserVm currentUser = currentUserService.getCurrentUser();
+        User user = UserMapper.USER_MAPPER.toUser(currentUser);
+
 
         Order order = new Order();
-        String orderCode = "ORD-" + Year.now().getValue() + "-" + userId + "-" + UUID.randomUUID().toString();
+        String orderCode = "ORD-" + Year.now().getValue() + "-" + currentUser.getId() + "-" + UUID.randomUUID().toString();
         order.setCode(orderCode);
         order.setTotalPrice(totalPriceDb);
         order.setTotalNumber(totalNumberDb);
         order.setProducts(productsList);
-        User user1 = user.get();
-        order.setUser(user1);
+        order.setUser(user);
         orderRepo.save(order);
 
 
